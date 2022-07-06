@@ -1,0 +1,22 @@
+{
+  "host": "ec2-11-111-11-11.ap-northeast-3.compute.amazonaws.com",
+  "kusanagi": {
+    "password": "somepassword"
+  },
+  "rootsite": {
+    "host": "my.site.com",
+    "dbname": "mydbname",
+    "dbuser": "mydbuser",
+    "dbpass": "mydbpass",
+    "wpuser": "mywpuser"
+  },
+  "subsites": [
+    {
+      "host": "my.site.com/subsite",
+      "dbname": "mysubdbname",
+      "dbuser": "mysubdbuser",
+      "dbpass": "mysubdbpass",
+      "wpuser": "mysubwpuser"
+    }
+  ]
+}
