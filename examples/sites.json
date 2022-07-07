@@ -1,21 +1,24 @@
 {
-  "host": "ec2-11-111-11-11.ap-northeast-3.compute.amazonaws.com",
-  "kusanagi": {
-    "password": "somepassword"
+  "domain": "mydomain-name.com",
+  "ec2": {
+    "host": "ec2-11-111-11-11.ap-northeast-3.compute.amazonaws.com",
+    "centos": {
+      "pem": "./ec2/aivec.co.jp-centos.pem"
+    },
+    "kusanagi": {
+      "pem": "./ec2/aivec.co.jp-kusanagi.pem"
+    }
   },
   "rootsite": {
-    "host": "my.site.com",
     "dbname": "mydbname",
     "dbuser": "mydbuser",
-    "dbpass": "mydbpass",
     "wpuser": "mywpuser"
   },
   "subsites": [
     {
-      "host": "my.site.com/subsite",
+      "name": "subsite-folder-name",
       "dbname": "mysubdbname",
       "dbuser": "mysubdbuser",
-      "dbpass": "mysubdbpass",
       "wpuser": "mysubwpuser"
     }
   ]
