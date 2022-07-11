@@ -25,7 +25,19 @@ export const finalize = (config) => {
     );
   })
 
-  commands.push(`kusanagi nginx --reload;`);
+  const rootcs = [];
+  rootcs.push('cd /etc/opt/kusanagi/nginx/conf.d;');
+  config.subsites.forEach((site) => {
+    rootcs.push(`
+      sudo sed -i 's/server_name\\\s${site.profile};/server_name ${site.profile}_ssl;/g' ${site.profile}.conf;
+      sudo sed -i '0,/server_name\\\s${site.profile}_ssl;/{s/server_name\\\s${site.profile}_ssl;/server_name ${site.profile};/}' ${site.profile}.conf;
+      sudo sed -i 's/https:\\/\\/${site.profile}\\$request_uri/https:\\/\\/${site.profile}_ssl\\$request_uri/' ${site.profile}.conf;
+      sudo sed -i 's/#rewrite/rewrite/' ${site.profile}.conf;
+    `)
+  });
 
   client.sshKusanagi(commands.join(' '));
+  client.sshCentos(rootcs.join(' '));
+
+  client.sshKusanagi('kusanagi nginx --reload;');
 };

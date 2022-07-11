@@ -15,28 +15,54 @@ const prepareFiles = (config, site) => {
 
   let dumpFile = null;
   let wpContent = null;
+  let extraFiles = [];
   if (site.dumpFileZip) {
     dumpFile = getFnameFromZip(site.dumpFileZip);
   }
   if (site.wpContentZip) {
     wpContent = getFnameFromZip(site.wpContentZip);
   }
+  if (site.extraFiles && Array.isArray(site.extraFiles)) {
+    extraFiles = site.extraFiles;
+  }
+
+  if (site.dumpFileZip || site.wpContentZip) {
+    client.sshKusanagi(
+      `mkdir -p /home/kusanagi/${site.profile}/DocumentRoot/zips`
+    );
+  }
 
   const commands = [];
   commands.push(`cd /home/kusanagi/${site.profile}/DocumentRoot;`);
   if (site.dumpFileZip) {
+    client.uploadKusanagi(
+      site.dumpFileZip,
+      `/home/kusanagi/${site.profile}/DocumentRoot/zips/`
+    );
     commands.push(`cd zips;`);
     commands.push(`unzip -o ${dumpFile}.zip;`);
     commands.push(`mv ${dumpFile}.sql ../;`);
     commands.push(`cd ../;`);
   }
   if (site.wpContentZip) {
+    client.uploadKusanagi(
+      site.wpContentZip,
+      `/home/kusanagi/${site.profile}/DocumentRoot/zips/`
+    );
     commands.push(`cd zips;`);
     commands.push(`unzip -o ${wpContent}.zip;`);
     commands.push(`cp -af ${wpContent}/* ../wp-content/;`);
     commands.push(`cd ../;`);
   }
   commands.push(`rm -rf zips;`);
+
+  extraFiles.forEach(({ zip, destination }) => {
+    client.uploadKusanagi(zip, destination);
+    const fname = getFnameFromZip(zip);
+    commands.push(`cd ${destination};`);
+    commands.push(`unzip -o ${destination}${fname}.zip;`);
+    commands.push(`rm -rf ${destination}${fname}.zip;`);
+  });
 
   client.sshKusanagi(commands.join(" "));
 };
@@ -80,6 +106,12 @@ const performInstall = (config, site) => {
     );
   }
 
+  if (site.customSearchReplace && Array.isArray(site.customSearchReplace)) {
+    site.customSearchReplace.forEach(({ pattern, replacement }) => {
+      commands.push(`wp search-replace ${pattern} ${replacement};`);
+    })
+  }
+
   client.sshKusanagi(commands.join(" "));
 
   client.sshCentos(`
@@ -103,6 +135,10 @@ const performInstall = (config, site) => {
 const updatePermissions = (config, site) => {
   const client = new SSH(config);
 
+  let extra = '';
+  if (site.permissionsUpdateTargets && Array.isArray(site.permissionsUpdateTargets)) {
+    extra = `sudo chown -R httpd:www ${site.permissionsUpdateTargets.join(' ')};`;
+  }
   client.sshCentos(`
     cd /home/kusanagi/${site.profile};
     [ -f ./DocumentRoot/wp-config.php ] && sudo mv ./DocumentRoot/wp-config.php ./ || sudo mv ./wp-config.php ./;
@@ -112,36 +148,14 @@ const updatePermissions = (config, site) => {
     cd DocumentRoot/wp-content;
     sudo chmod 644 index.php advanced-cache.php replace-class.php;
     sudo chmod 755 translate-accelerator;
-    sudo chown -R httpd:www replace-class.php translate-accelerator uploads/*;
+    sudo chown -R httpd:www replace-class.php translate-accelerator uploads/*; ${extra}
   `);
 };
 
 
 export const wpInstall = (config) => {
-  const client = new SSH(config);
-
   const ccopy = _.cloneDeep(config);
   [config.rootsite, ...config.subsites].forEach((site, i) => {
-    if (site.dumpFileZip || site.wpContentZip) {
-      client.sshKusanagi(
-        `mkdir -p /home/kusanagi/${site.profile}/DocumentRoot/zips`
-      );
-    }
-
-    if (site.dumpFileZip) {
-      client.uploadKusanagi(
-        site.dumpFileZip,
-        `/home/kusanagi/${site.profile}/DocumentRoot/zips/`
-      );
-    }
-
-    if (site.wpContentZip) {
-      client.uploadKusanagi(
-        site.wpContentZip,
-        `/home/kusanagi/${site.profile}/DocumentRoot/zips/`
-      );
-    }
-
     prepareFiles(config, site);
     const updateds = performInstall(config, site);
     if (i === 0) {
