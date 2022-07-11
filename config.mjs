@@ -58,6 +58,26 @@ export const getConfig = () => {
   return rawconfig;
 }
 
+export const getCredentialsConfigPath = () => {
+  const confp = getConfigPath();
+  const pathp = confp.split('.json');
+  pathp.pop();
+  return `${pathp.join('')}.credentials.json`;
+}
+
+export const getCredentialsConfig = () => {
+  const cpath = getCredentialsConfigPath();
+  if (!existsSync(cpath)) {
+    console.log(`${cpath} doesnt exist`);
+    process.exit(1);
+  }
+
+  const config = JSON.parse(readFileSync(cpath, 'utf8'));
+  validateConfig(config);
+
+  return config;
+}
+
 export const updateConfigFile = (config) => {
-  writeFileSync(getConfigPath(), JSON.stringify(config, null, 2));
+  writeFileSync(getCredentialsConfigPath(), JSON.stringify(config, null, 2));
 }

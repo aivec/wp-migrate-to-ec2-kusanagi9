@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { getCredentialsConfig } from './config.mjs';
-import { nginxConfigure } from './nginx-configure.mjs';
+import { finalize } from './finalize.mjs';
 
 const config = getCredentialsConfig();
-nginxConfigure(config);
+finalize(config);

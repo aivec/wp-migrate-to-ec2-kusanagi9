@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { getConfig } from './config.mjs';
+import { getCredentialsConfig } from './config.mjs';
 import { wpInstall } from './wp-install.mjs';
 
-const config = getConfig();
+const config = getCredentialsConfig();
 wpInstall(config);

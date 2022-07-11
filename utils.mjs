@@ -43,6 +43,13 @@ export class SSH {
     );
   }
 
+  uploadCentos(localpath, remotepath) {
+    shell(`chmod 400 ${this.finalc.ec2.centos.pem}`);
+    shell(
+      `scp -i ${this.finalc.ec2.centos.pem} ${localpath} centos@${this.finalc.ec2.host}:${remotepath}`
+    );
+  }
+
   downloadCentos(remotepath, localpath) {
     shell(`chmod 400 ${this.finalc.ec2.centos.pem}`);
     shell(
