@@ -32,7 +32,6 @@ export const finalize = (config) => {
       sudo sed -i 's/server_name\\\s${site.profile};/server_name ${site.profile}_ssl;/g' ${site.profile}.conf;
       sudo sed -i '0,/server_name\\\s${site.profile}_ssl;/{s/server_name\\\s${site.profile}_ssl;/server_name ${site.profile};/}' ${site.profile}.conf;
       sudo sed -i 's/https:\\/\\/${site.profile}\\$request_uri/https:\\/\\/${site.profile}_ssl\\$request_uri/' ${site.profile}.conf;
-      sudo sed -i 's/#rewrite/rewrite/' ${site.profile}.conf;
     `)
   });
 
