@@ -6,7 +6,7 @@ import { SSH, shell, genPwd } from "./utils.mjs";
 /**
  * Initialize kusanagi (Nginx, MySQL, etc)
  */
-export const ec2Init = (config, callback) => {
+export const ec2Init = (config, callback = () => {}) => {
   const client = new SSH(config);
 
   client.sshCentos("sudo dnf update -y");
